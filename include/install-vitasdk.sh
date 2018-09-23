@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ "$EUID" -ne 0 ]; then
+  SUDO="sudo "
+else
+  SUDO=""
+fi
+
 get_download_link () {
   curl "https://api.github.com/repos/vitasdk/autobuilds/releases" | grep "master" | grep "browser_download_url" | grep $1 | head -n 1 | cut -d '"' -f 4
 }
@@ -17,11 +23,11 @@ install_vitasdk () {
 
      Linux*)
       if [ -n "${TRAVIS}" ]; then
-          sudo apt-get install libc6-i386 lib32stdc++6 lib32gcc1 patch
+          $SUDO apt-get install libc6-i386 lib32stdc++6 lib32gcc1 patch
       fi
       if [ ! -d "$INSTALLDIR" ]; then
-        sudo mkdir -p $INSTALLDIR
-        sudo chown $USER:$(id -gn $USER) $INSTALLDIR
+        $SUDO mkdir -p $INSTALLDIR
+        $SUDO chown $USER:$(id -gn $USER) $INSTALLDIR
       fi
       wget -O "vitasdk-nightly.tar.bz2" "$(get_download_link linux)"
       tar xf "vitasdk-nightly.tar.bz2" -C $INSTALLDIR --strip-components=1
